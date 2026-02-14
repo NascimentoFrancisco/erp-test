@@ -1,0 +1,16 @@
+[flake8]
+exclude =
+    migrations/,
+    __pycache__/,
+    venv/,
+    .venv/,
+    .env/,
+    .git/,
+    .idea/,
+    .vscode/,
+    docs/,
+    requirements.txt
+
+max-line-length = 100
+max-complexity = 15
+extend-ignore = W503, W391, E203

@@ -1,0 +1,61 @@
+services:
+  redis-erp-dev:
+    image: redis:7-alpine
+    container_name: erp_redis_dev
+    restart: always
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data_erp:/data
+    ports:
+      - "127.0.0.1:6380:6379"
+    networks:
+      - erp_network
+
+  db:
+    image: mysql:8.4
+    container_name: erp_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: erp
+      MYSQL_USER: erp
+      MYSQL_PASSWORD: erp
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysqldata:/var/lib/mysql
+    networks:
+      - erp_network
+
+  api-erp-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: erp-basic:dev
+    container_name: erp_api_dev
+    restart: always
+    volumes:
+      - .:/app
+    ports:
+      - "127.0.0.1:8000:8000"
+    env_file:
+      - .env.dev
+    depends_on:
+      db:
+        condition: service_started
+      redis-erp-dev:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - erp_network
+
+volumes:
+  mysqldata:
+  redis_data_erp:
+
+networks:
+  erp_network:
