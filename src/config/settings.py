@@ -27,6 +27,7 @@ INSTALLED_APPS = [
 INSTALLED_APPS = INSTALLED_APPS + [
     "apps.core",
     "apps.customers",
+    "apps.products"
 ]
 
 MIDDLEWARE = [
@@ -79,7 +80,10 @@ DATABASES = {
             "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
             "charset": "utf8mb4",
         },
-    }
+        "TEST": {
+            "NAME": config("DATABASE_TEST_NAME", default="erp_test"),
+        },
+    },
 }
 
 AUTH_PASSWORD_VALIDATORS = [

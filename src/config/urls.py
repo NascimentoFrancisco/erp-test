@@ -30,6 +30,7 @@ urlpatterns = [
     path("docs/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("admin/", admin.site.urls),
     path(f"{url_v1}/customers/", include("apps.customers.urls")),
+    path(f"{url_v1}/products/", include("apps.products.urls")),
 ]
 
 if settings.DEBUG:
