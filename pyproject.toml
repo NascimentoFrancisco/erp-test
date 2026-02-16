@@ -15,7 +15,9 @@ dependencies = [
     "redis (>=5.0,<6.0)",
     "django-redis (>=5.4,<6.0)",
     "drf-spectacular (>=0.27,<1.0)",
-    "python-dotenv (>=1.0,<2.0)"
+    "python-decouple (>=3.8,<4.0)",
+    "cpf-cnpj-validate (>=1.4,<2.0)",
+    "django-filter (>=25.2,<26.0)",
 ]
 
 [build-system]
@@ -38,3 +40,25 @@ dev = [
 DJANGO_SETTINGS_MODULE = "config.settings"
 pythonpath = ["src"]
 testpaths = ["tests"]
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+exclude = '''
+(
+  /migrations/
+  | /venv/
+  | /.venv/
+  | /.env/
+  | /.git/
+  | /.idea/
+  | /.vscode/
+  | /docs/
+)
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+src_paths = ["src", "tests"]
+skip_glob = ["*/migrations/*", "venv/*", ".venv/*", ".env/*", "docs/*"]

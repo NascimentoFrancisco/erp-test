@@ -220,6 +220,18 @@ files = [
 toml = ["tomli ; python_full_version <= \"3.11.0a6\""]
 
 [[package]]
+name = "cpf-cnpj-validate"
+version = "1.4"
+description = "Python module for brazilian register numbers for persons (CPF) and companies (CNPJ) and mask generator to string or int CPF/CNPJ."
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "cpf_cnpj_validate-1.4-py3-none-any.whl", hash = "sha256:e30e125a1c4d4749b80e7f87ea192ccbcfbafb6c85b27833ecffc41da9df47ff"},
+    {file = "cpf_cnpj_validate-1.4.tar.gz", hash = "sha256:611dfc08bf3c1c040ce47294d1c04e77e12b6b2d4e1029cc7a5ee2d2079c0ece"},
+]
+
+[[package]]
 name = "django"
 version = "5.2.11"
 description = "A high-level Python web framework that encourages rapid development and clean, pragmatic design."
@@ -239,6 +251,24 @@ tzdata = {version = "*", markers = "sys_platform == \"win32\""}
 [package.extras]
 argon2 = ["argon2-cffi (>=19.1.0)"]
 bcrypt = ["bcrypt"]
+
+[[package]]
+name = "django-filter"
+version = "25.2"
+description = "Django-filter is a reusable Django application for allowing users to filter querysets dynamically."
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "django_filter-25.2-py3-none-any.whl", hash = "sha256:9c0f8609057309bba611062fe1b720b4a873652541192d232dd28970383633e3"},
+    {file = "django_filter-25.2.tar.gz", hash = "sha256:760e984a931f4468d096f5541787efb8998c61217b73006163bf2f9523fe8f23"},
+]
+
+[package.dependencies]
+Django = ">=5.2"
+
+[package.extras]
+drf = ["djangorestframework"]
 
 [[package]]
 name = "django-redis"
@@ -657,19 +687,16 @@ files = [
 six = ">=1.5"
 
 [[package]]
-name = "python-dotenv"
-version = "1.2.1"
-description = "Read key-value pairs from a .env file and set them as environment variables"
+name = "python-decouple"
+version = "3.8"
+description = "Strict separation of settings from code."
 optional = false
-python-versions = ">=3.9"
+python-versions = "*"
 groups = ["main"]
 files = [
-    {file = "python_dotenv-1.2.1-py3-none-any.whl", hash = "sha256:b81ee9561e9ca4004139c6cbba3a238c32b03e4894671e181b671e8cb8425d61"},
-    {file = "python_dotenv-1.2.1.tar.gz", hash = "sha256:42667e897e16ab0d66954af0e60a9caa94f0fd4ecf3aaf6d2d260eec1aa36ad6"},
+    {file = "python-decouple-3.8.tar.gz", hash = "sha256:ba6e2657d4f376ecc46f77a3a615e058d93ba5e465c01bbe57289bfb7cce680f"},
+    {file = "python_decouple-3.8-py3-none-any.whl", hash = "sha256:d0d45340815b25f4de59c974b855bb38d03151d81b037d9e3f463b0c9f8cbd66"},
 ]
-
-[package.extras]
-cli = ["click (>=5.0)"]
 
 [[package]]
 name = "pyyaml"
@@ -984,4 +1011,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.14"
-content-hash = "a4c174465573eaad2a2445659fff6252405622dfcd6d898e7c594c5550411793"
+content-hash = "5adc82bbb9006c491521d069147c68fd53c9363611d2207bcc17dc3f0dca0cb0"
