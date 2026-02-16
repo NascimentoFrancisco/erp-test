@@ -54,3 +54,107 @@ def test_update_stock(api_client, product):
 
     product.refresh_from_db()
     assert product.stock_quantity == 50
+
+
+@pytest.mark.django_db
+def test_filter_products_by_sku(api_client):
+    product_1 = Product.objects.create(
+        sku="SKU-AAA",
+        name="Notebook Pro",
+        description="Descrição A",
+        price=1000,
+        stock_quantity=10,
+        is_active=True,
+    )
+    Product.objects.create(
+        sku="SKU-BBB",
+        name="Mouse Gamer",
+        description="Descrição B",
+        price=200,
+        stock_quantity=15,
+        is_active=True,
+    )
+
+    response = api_client.get(f"/api/v1/products/?sku={product_1.sku}")
+
+    assert response.status_code == 200
+    assert response.data["total"] == 1
+    assert response.data["results"][0]["id"] == str(product_1.id)
+
+
+@pytest.mark.django_db
+def test_filter_products_by_name_exact(api_client):
+    product_1 = Product.objects.create(
+        sku="SKU-AAA",
+        name="Notebook Pro",
+        description="Descrição A",
+        price=1000,
+        stock_quantity=10,
+        is_active=True,
+    )
+    Product.objects.create(
+        sku="SKU-BBB",
+        name="Notebook Air",
+        description="Descrição B",
+        price=2000,
+        stock_quantity=15,
+        is_active=True,
+    )
+
+    response = api_client.get("/api/v1/products/?name=Notebook Pro")
+
+    assert response.status_code == 200
+    assert response.data["total"] == 1
+    assert response.data["results"][0]["id"] == str(product_1.id)
+
+
+@pytest.mark.django_db
+def test_filter_products_by_name_like(api_client):
+    product_1 = Product.objects.create(
+        sku="SKU-AAA",
+        name="Notebook Pro",
+        description="Descrição A",
+        price=1000,
+        stock_quantity=10,
+        is_active=True,
+    )
+    Product.objects.create(
+        sku="SKU-BBB",
+        name="Mouse Gamer",
+        description="Descrição B",
+        price=200,
+        stock_quantity=15,
+        is_active=True,
+    )
+
+    response = api_client.get("/api/v1/products/?name_like=note")
+
+    assert response.status_code == 200
+    assert response.data["total"] == 1
+    assert response.data["results"][0]["id"] == str(product_1.id)
+
+
+@pytest.mark.django_db
+def test_filter_products_by_is_active(api_client):
+    active_product = Product.objects.create(
+        sku="SKU-AAA",
+        name="Produto Ativo",
+        description="Descrição A",
+        price=1000,
+        stock_quantity=10,
+        is_active=True,
+    )
+    Product.objects.create(
+        sku="SKU-BBB",
+        name="Produto Inativo",
+        description="Descrição B",
+        price=200,
+        stock_quantity=15,
+        is_active=False,
+    )
+
+    response = api_client.get("/api/v1/products/?is_active=true")
+
+    assert response.status_code == 200
+    assert response.data["total"] == 1
+    assert response.data["results"][0]["id"] == str(active_product.id)

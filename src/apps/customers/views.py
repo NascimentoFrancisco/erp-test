@@ -5,8 +5,10 @@ from rest_framework import (
     response
 )
 from drf_spectacular.utils import extend_schema, extend_schema_view
+from django_filters.rest_framework import DjangoFilterBackend
 from apps.customers.models import Customer
 from apps.customers.serializers import CustomerModelSerializer
+from apps.customers.filters import CustomerFilter
 
 
 @extend_schema_view(
@@ -31,6 +33,8 @@ from apps.customers.serializers import CustomerModelSerializer
 class CustomerViewSet(viewsets.ModelViewSet):
     queryset = Customer.objects.all()
     serializer_class = CustomerModelSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = CustomerFilter
 
     def get_object(self) -> Customer:
         obj = get_object_or_404(self.get_queryset(), pk=self.kwargs["id"])

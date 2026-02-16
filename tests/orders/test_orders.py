@@ -309,3 +309,84 @@ def test_list_order_status_history_returns_404_when_order_does_not_exist(api_cli
     response = api_client.get(f"/api/v1/orders/{uuid.uuid4()}/status-history/")
 
     assert response.status_code == 404
+
+
+@pytest.mark.django_db
+def test_filter_orders_by_order_number(api_client, customer):
+    first_order = Order.objects.create(
+        customer=customer,
+        total_amount=100,
+        idempotency_key="filter-order-number-1",
+    )
+    Order.objects.create(
+        customer=customer,
+        total_amount=200,
+        idempotency_key="filter-order-number-2",
+    )
+
+    response = api_client.get(
+        f"/api/v1/orders/?order_number={first_order.order_number[:6]}"
+    )
+
+    assert response.status_code == 200
+    assert response.data["total"] == 1
+    assert response.data["results"][0]["id"] == str(first_order.id)
+
+
+@pytest.mark.django_db
+def test_filter_orders_by_customer(api_client):
+    customer_1 = Customer.objects.create(
+        name="Cliente 1",
+        document="52998224725",
+        email="cliente1-filtro-order@teste.com",
+        phone="111111111",
+        address="Rua 1",
+        is_active=True,
+    )
+    customer_2 = Customer.objects.create(
+        name="Cliente 2",
+        document="16899535009",
+        email="cliente2-filtro-order@teste.com",
+        phone="222222222",
+        address="Rua 2",
+        is_active=True,
+    )
+    order_customer_1 = Order.objects.create(
+        customer=customer_1,
+        total_amount=100,
+        idempotency_key="filter-customer-1",
+    )
+    Order.objects.create(
+        customer=customer_2,
+        total_amount=200,
+        idempotency_key="filter-customer-2",
+    )
+
+    response = api_client.get(f"/api/v1/orders/?customer={customer_1.id}")
+
+    assert response.status_code == 200
+    assert response.data["total"] == 1
+    assert response.data["results"][0]["id"] == str(order_customer_1.id)
+
+
+@pytest.mark.django_db
+def test_filter_orders_by_status(api_client, customer):
+    confirmed_order = Order.objects.create(
+        customer=customer,
+        total_amount=100,
+        status=OrderStatus.CONFIRMED,
+        idempotency_key="filter-status-confirmed",
+    )
+    Order.objects.create(
+        customer=customer,
+        total_amount=200,
+        status=OrderStatus.PENDING,
+        idempotency_key="filter-status-pending",
+    )
+
+    response = api_client.get(f"/api/v1/orders/?status={OrderStatus.CONFIRMED}")
+
+    assert response.status_code == 200
+    assert response.data["total"] == 1
+    assert response.data["results"][0]["id"] == str(confirmed_order.id)
+

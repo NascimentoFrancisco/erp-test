@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from django.db import transaction
 from django.db.models import F
 from rest_framework import status, viewsets, mixins
@@ -5,6 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema, extend_schema_view
+from django_filters.rest_framework import DjangoFilterBackend
 from apps.orders.models import Order, OrderItem, OrderStatus, OrderStatusHistory
 from apps.orders.serializers import (
     OrderCreateSerializer,
@@ -13,6 +15,7 @@ from apps.orders.serializers import (
     OrderStatusHistoryOutputSerializer,
     OrderStatusUpdateSerializer,
 )
+from apps.orders.filters import OrderFilter
 from apps.products.models import Product
 
 
@@ -38,7 +41,8 @@ class OrderViewSet(
     mixins.RetrieveModelMixin
 ):
     queryset = Order.objects.all()
-    lookup_field = "id"
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = OrderFilter
 
     def get_serializer_class(self):
         if self.action == "create":
@@ -46,6 +50,11 @@ class OrderViewSet(
         if self.action == "update_status":
             return OrderStatusUpdateSerializer
         return OrderDetailSerializer
+
+    def get_object(self) -> Order:
+        obj = get_object_or_404(self.get_queryset(), id=self.kwargs["id"])
+        self.check_object_permissions(self.request, obj)
+        return obj
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

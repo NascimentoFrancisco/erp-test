@@ -6,12 +6,14 @@ from rest_framework import (
 )
 from rest_framework.decorators import action
 from drf_spectacular.utils import extend_schema, extend_schema_view
+from django_filters.rest_framework import DjangoFilterBackend
 from apps.products.models import Product
 from apps.products.serializers import (
     ProductModelSerializer,
     ProductUpdateSerializer,
     ProductStockUpdateSerializer
 )
+from apps.products.filters import ProductFilter
 
 
 @extend_schema_view(
@@ -36,9 +38,11 @@ from apps.products.serializers import (
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductModelSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ProductFilter
 
     def get_object(self) -> Product:
-        obj = get_object_or_404(self.get_queryset(), pk=self.kwargs["id"])
+        obj = get_object_or_404(self.get_queryset(), id=self.kwargs["id"])
         self.check_object_permissions(self.request, obj)
         return obj
 

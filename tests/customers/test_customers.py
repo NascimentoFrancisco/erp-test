@@ -190,3 +190,82 @@ def test_bulk_create_100_customers(api_client):
 
     assert Customer.objects.count() >= len(VALID_CPFS)
 
+
+@pytest.mark.django_db
+def test_filter_customers_by_document(api_client):
+    customer_1 = Customer.objects.create(
+        name="Cliente 1",
+        document="52998224725",
+        email="cliente1@teste.com",
+        phone="111111111",
+        address="Rua 1",
+        is_active=True,
+    )
+    Customer.objects.create(
+        name="Cliente 2",
+        document="16899535009",
+        email="cliente2@teste.com",
+        phone="222222222",
+        address="Rua 2",
+        is_active=True,
+    )
+
+    response = api_client.get(
+        f"/api/v1/customers/?document={customer_1.document}"
+    )
+
+    assert response.status_code == 200
+    assert response.data["total"] == 1
+    assert response.data["results"][0]["id"] == str(customer_1.id)
+
+
+@pytest.mark.django_db
+def test_filter_customers_by_email(api_client):
+    customer_1 = Customer.objects.create(
+        name="Cliente 1",
+        document="52998224725",
+        email="cliente1@teste.com",
+        phone="111111111",
+        address="Rua 1",
+        is_active=True,
+    )
+    Customer.objects.create(
+        name="Cliente 2",
+        document="16899535009",
+        email="cliente2@teste.com",
+        phone="222222222",
+        address="Rua 2",
+        is_active=True,
+    )
+
+    response = api_client.get(f"/api/v1/customers/?email={customer_1.email}")
+
+    assert response.status_code == 200
+    assert response.data["total"] == 1
+    assert response.data["results"][0]["id"] == str(customer_1.id)
+
+
+@pytest.mark.django_db
+def test_filter_customers_by_is_active(api_client):
+    active_customer = Customer.objects.create(
+        name="Cliente Ativo",
+        document="52998224725",
+        email="ativo@teste.com",
+        phone="111111111",
+        address="Rua 1",
+        is_active=True,
+    )
+    Customer.objects.create(
+        name="Cliente Inativo",
+        document="16899535009",
+        email="inativo@teste.com",
+        phone="222222222",
+        address="Rua 2",
+        is_active=False,
+    )
+
+    response = api_client.get("/api/v1/customers/?is_active=true")
+
+    assert response.status_code == 200
+    assert response.data["total"] == 1
+    assert response.data["results"][0]["id"] == str(active_customer.id)
