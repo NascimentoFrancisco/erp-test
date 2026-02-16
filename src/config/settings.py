@@ -63,8 +63,27 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
     ],
+    "DEFAULT_THROTTLE_CLASSES": [
+        "apps.core.throttles.ClientOrIPRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "client": config(
+            "API_RATE_LIMIT_PER_HOUR",
+            default="100/hour",
+        ),
+    },
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PAGINATION_CLASS": "apps.core.paginator.PersonalPagination",
+}
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": config("REDIS_URL"),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+    }
 }
 
 WSGI_APPLICATION = "config.wsgi.application"
