@@ -16,14 +16,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Build CLI image
-        run: docker compose -f docker-compose.cli.yml build api-cli
-
+      - uses: actions/checkout@v4
+  
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+  
+      - name: Install Poetry
+        run: pip install poetry
+  
+      - name: Install dependencies (no dev extras if quiser otimizar)
+        run: poetry install --no-interaction --no-root
+  
       - name: Run flake8
-        run: docker compose -f docker-compose.cli.yml run --rm --no-deps api-cli poetry run flake8 src tests
+        run: poetry run flake8 src tests
 
   tests:
     name: Unit tests (pytest)
@@ -40,7 +47,7 @@ jobs:
         run: docker compose -f docker-compose.cli.yml up -d --wait db redis
 
       - name: Run pytest
-        run: docker compose -f docker-compose.cli.yml run --rm api-cli poetry run pytest -q
+        run: docker compose -f docker-compose.cli.yml run --rm --entrypoint "" api-cli poetry run pytest -q
 
       - name: Shutdown
         if: always()
