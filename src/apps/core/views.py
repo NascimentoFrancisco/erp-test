@@ -62,3 +62,11 @@ class SpectacularRapiDocView(APIView):
             lang=request.GET.get("lang"),
             version=request.GET.get("version"),
         )
+
+
+class HealthCheckView(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(exclude=True)
+    def get(self, request, *args, **kwargs):
+        return Response({"status": "ok"})

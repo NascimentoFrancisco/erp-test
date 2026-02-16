@@ -4,13 +4,14 @@ from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView
 
-from apps.core.views import SpectacularRapiDocView
+from apps.core.views import HealthCheckView, SpectacularRapiDocView
 
 url_v1 = "api/v1"
 
 urlpatterns = [
     path("", SpectacularRapiDocView.as_view(url_name="schema"), name="redoc"),
     path("docs/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("health/", HealthCheckView.as_view(), name="health"),
     path("admin/", admin.site.urls),
     path(f"{url_v1}/customers/", include("apps.customers.urls")),
     path(f"{url_v1}/products/", include("apps.products.urls")),

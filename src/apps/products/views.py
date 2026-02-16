@@ -46,7 +46,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         summary="Atualizar estoque do produto",
         tags=["Produtos"],
     )
-    @action(detail=True, methods=["patch"], url_path="update-stock")
+    @action(detail=True, methods=["patch"], url_path="stock")
     def update_stock(self, request, id=None):
         product = self.get_object()
 

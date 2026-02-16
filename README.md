@@ -164,7 +164,7 @@ Filtros:
 - `POST /api/v1/products/`
 - `GET /api/v1/products/<id>/`
 - `PATCH /api/v1/products/<id>/`
-- `PATCH /api/v1/products/<id>/update-stock/`
+- `PATCH /api/v1/products/<id>/stock/`
 
 Filtros:
 
