@@ -9,8 +9,8 @@ services:
       DEBUG: "False"
       DATABASE_NAME: erp
       DATABASE_TEST_NAME: erp_test
-      DATABASE_USER: erp
-      DATABASE_PASSWORD: erp
+      DATABASE_USER: root
+      DATABASE_PASSWORD: root
       DATABASE_HOST: db
       DATABASE_PORT: "3306"
       REDIS_URL: redis://redis:6379/1
