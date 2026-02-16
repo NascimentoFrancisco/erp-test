@@ -3,7 +3,6 @@ import logging
 from contextvars import ContextVar
 from datetime import datetime, timezone
 
-
 _correlation_id_ctx: ContextVar[str] = ContextVar("correlation_id", default="-")
 
 

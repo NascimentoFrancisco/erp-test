@@ -1,9 +1,11 @@
-import uuid
 import random
+import uuid
+
 import pytest
 from django.core.cache import cache
 from rest_framework import status
 from rest_framework.test import APIClient
+
 from apps.customers.models import Customer
 
 
@@ -210,9 +212,7 @@ def test_filter_customers_by_document(api_client):
         is_active=True,
     )
 
-    response = api_client.get(
-        f"/api/v1/customers/?document={customer_1.document}"
-    )
+    response = api_client.get(f"/api/v1/customers/?document={customer_1.document}")
 
     assert response.status_code == 200
     assert response.data["total"] == 1

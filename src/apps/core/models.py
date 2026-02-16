@@ -1,4 +1,5 @@
 import uuid
+
 from django.db import models
 from django.utils import timezone
 
@@ -21,9 +22,7 @@ class SoftDeleteQuerySet(models.QuerySet):
 
 class SoftDeleteManager(models.Manager):
     def get_queryset(self):
-        return SoftDeleteQuerySet(self.model, using=self._db).filter(
-            deleted_at__isnull=True
-        )
+        return SoftDeleteQuerySet(self.model, using=self._db).filter(deleted_at__isnull=True)
 
 
 class CoreModel(TimeStampedModel):

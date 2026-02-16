@@ -40,3 +40,25 @@ dev = [
 DJANGO_SETTINGS_MODULE = "config.settings"
 pythonpath = ["src"]
 testpaths = ["tests"]
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+exclude = '''
+(
+  /migrations/
+  | /venv/
+  | /.venv/
+  | /.env/
+  | /.git/
+  | /.idea/
+  | /.vscode/
+  | /docs/
+)
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+src_paths = ["src", "tests"]
+skip_glob = ["*/migrations/*", "venv/*", ".venv/*", ".env/*", "docs/*"]

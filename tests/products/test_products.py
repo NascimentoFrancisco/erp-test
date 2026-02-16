@@ -1,5 +1,6 @@
 import pytest
 from rest_framework.test import APIClient
+
 from apps.products.models import Product
 
 
@@ -46,8 +47,7 @@ def test_create_product(api_client):
 @pytest.mark.django_db
 def test_update_stock(api_client, product):
     response = api_client.patch(
-        f"/api/v1/products/{product.id}/update-stock/",
-        {"stock_quantity": 50}
+        f"/api/v1/products/{product.id}/update-stock/", {"stock_quantity": 50}
     )
 
     assert response.status_code == 200

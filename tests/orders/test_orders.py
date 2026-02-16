@@ -1,11 +1,13 @@
-import uuid
 import threading
+import uuid
+
 import pytest
 from django.core.cache import cache
 from rest_framework.test import APIClient
+
 from apps.customers.models import Customer
-from apps.products.models import Product
 from apps.orders.models import Order, OrderItem, OrderStatus, OrderStatusHistory
+from apps.products.models import Product
 
 
 @pytest.fixture
@@ -52,12 +54,7 @@ def test_create_order_success(api_client, customer, product):
     payload = {
         "customer_id": str(customer.id),
         "idempotency_key": "key-123",
-        "items": [
-            {
-                "product_id": str(product.id),
-                "quantity": 2
-            }
-        ]
+        "items": [{"product_id": str(product.id), "quantity": 2}],
     }
 
     response = api_client.post("/api/v1/orders/", payload, format="json")
@@ -77,7 +74,7 @@ def test_order_fails_without_stock(api_client, customer, product, product_no_sto
         "items": [
             {"product_id": str(product.id), "quantity": 2},
             {"product_id": str(product_no_stock.id), "quantity": 1},
-        ]
+        ],
     }
 
     response = api_client.post("/api/v1/orders/", payload, format="json")
@@ -94,9 +91,7 @@ def test_order_idempotency(api_client, customer, product):
     payload = {
         "customer_id": str(customer.id),
         "idempotency_key": "same-key",
-        "items": [
-            {"product_id": str(product.id), "quantity": 1}
-        ]
+        "items": [{"product_id": str(product.id), "quantity": 1}],
     }
 
     r1 = api_client.post("/api/v1/orders/", payload, format="json")
@@ -118,12 +113,7 @@ def test_stock_concurrency(customer, product):
     payload = {
         "customer_id": str(customer.id),
         "idempotency_key": str(uuid.uuid4()),
-        "items": [
-            {
-                "product_id": str(product.id),
-                "quantity": 8
-            }
-        ]
+        "items": [{"product_id": str(product.id), "quantity": 8}],
     }
 
     responses = []
@@ -150,16 +140,10 @@ def test_stock_concurrency(customer, product):
 
 @pytest.mark.django_db
 def test_valid_status_transition(api_client, customer, product):
-    order = Order.objects.create(
-        customer=customer,
-        total_amount=100,
-        idempotency_key="status-key"
-    )
+    order = Order.objects.create(customer=customer, total_amount=100, idempotency_key="status-key")
 
     response = api_client.patch(
-        f"/api/v1/orders/{order.id}/status/",
-        {"new_status": OrderStatus.CONFIRMED},
-        format="json"
+        f"/api/v1/orders/{order.id}/status/", {"new_status": OrderStatus.CONFIRMED}, format="json"
     )
 
     assert response.status_code == 200
@@ -171,15 +155,11 @@ def test_valid_status_transition(api_client, customer, product):
 @pytest.mark.django_db
 def test_invalid_status_transition(api_client, customer):
     order = Order.objects.create(
-        customer=customer,
-        total_amount=100,
-        idempotency_key="invalid-status"
+        customer=customer, total_amount=100, idempotency_key="invalid-status"
     )
 
     response = api_client.patch(
-        f"/api/v1/orders/{order.id}/status/",
-        {"new_status": OrderStatus.SHIPPED},
-        format="json"
+        f"/api/v1/orders/{order.id}/status/", {"new_status": OrderStatus.SHIPPED}, format="json"
     )
 
     assert response.status_code == 400
@@ -188,11 +168,7 @@ def test_invalid_status_transition(api_client, customer):
 @pytest.mark.django_db
 def test_cancel_order_returns_stock(api_client, customer, product):
 
-    order = Order.objects.create(
-        customer=customer,
-        total_amount=0,
-        idempotency_key="cancel-key"
-    )
+    order = Order.objects.create(customer=customer, total_amount=0, idempotency_key="cancel-key")
 
     product.stock_quantity = 10
     product.save()
@@ -201,6 +177,7 @@ def test_cancel_order_returns_stock(api_client, customer, product):
     product.save()
 
     from apps.orders.models import OrderItem
+
     OrderItem.objects.create(
         id=uuid.uuid4(),
         order=order,
@@ -226,9 +203,7 @@ def test_create_order_with_inactive_customer(api_client, customer, product):
     payload = {
         "customer_id": str(customer.id),
         "idempotency_key": "inactive-key",
-        "items": [
-            {"product_id": str(product.id), "quantity": 1}
-        ]
+        "items": [{"product_id": str(product.id), "quantity": 1}],
     }
 
     response = api_client.post("/api/v1/orders/", payload, format="json")
@@ -238,11 +213,7 @@ def test_create_order_with_inactive_customer(api_client, customer, product):
 
 @pytest.mark.django_db
 def test_list_order_items(api_client, customer, product):
-    order = Order.objects.create(
-        customer=customer,
-        total_amount=200,
-        idempotency_key="items-key"
-    )
+    order = Order.objects.create(customer=customer, total_amount=200, idempotency_key="items-key")
 
     item = OrderItem.objects.create(
         id=uuid.uuid4(),
@@ -272,11 +243,7 @@ def test_list_order_items_returns_404_when_order_does_not_exist(api_client):
 
 @pytest.mark.django_db
 def test_list_order_status_history(api_client, customer):
-    order = Order.objects.create(
-        customer=customer,
-        total_amount=100,
-        idempotency_key="history-key"
-    )
+    order = Order.objects.create(customer=customer, total_amount=100, idempotency_key="history-key")
 
     first_history = OrderStatusHistory.objects.create(
         order=order,
@@ -324,9 +291,7 @@ def test_filter_orders_by_order_number(api_client, customer):
         idempotency_key="filter-order-number-2",
     )
 
-    response = api_client.get(
-        f"/api/v1/orders/?order_number={first_order.order_number[:6]}"
-    )
+    response = api_client.get(f"/api/v1/orders/?order_number={first_order.order_number[:6]}")
 
     assert response.status_code == 200
     assert response.data["total"] == 1
@@ -389,4 +354,3 @@ def test_filter_orders_by_status(api_client, customer):
     assert response.status_code == 200
     assert response.data["total"] == 1
     assert response.data["results"][0]["id"] == str(confirmed_order.id)
-

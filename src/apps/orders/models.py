@@ -1,6 +1,7 @@
 import uuid
-from django.db import models
-from django.db import IntegrityError
+
+from django.db import IntegrityError, models
+
 from apps.core.models import CoreModel
 
 
@@ -15,37 +16,24 @@ class OrderStatus(models.TextChoices):
 
 class Order(CoreModel):
     order_number = models.CharField(
-        max_length=30,
-        unique=True,
-        editable=False,
-        verbose_name="Número único do pedido"
+        max_length=30, unique=True, editable=False, verbose_name="Número único do pedido"
     )
     customer = models.ForeignKey(
         "customers.Customer",
         on_delete=models.PROTECT,
         related_name="orders",
-        verbose_name="Cliente"
+        verbose_name="Cliente",
     )
     status = models.CharField(
         max_length=20,
         choices=OrderStatus.choices,
         default=OrderStatus.PENDING,
         db_index=True,
-        verbose_name="Status"
+        verbose_name="Status",
     )
-    total_amount = models.DecimalField(
-        max_digits=15,
-        decimal_places=2,
-        verbose_name="Valor total"
-    )
-    idempotency_key = models.CharField(
-        max_length=255,
-        unique=True
-    )
-    observations = models.TextField(
-        blank=True,
-        verbose_name="Observações"
-    )
+    total_amount = models.DecimalField(max_digits=15, decimal_places=2, verbose_name="Valor total")
+    idempotency_key = models.CharField(max_length=255, unique=True)
+    observations = models.TextField(blank=True, verbose_name="Observações")
 
     class Meta:
         db_table = "orders"
@@ -76,30 +64,17 @@ class Order(CoreModel):
 class OrderItem(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     order = models.ForeignKey(
-        Order,
-        on_delete=models.CASCADE,
-        related_name="items",
-        verbose_name="Pedido"
+        Order, on_delete=models.CASCADE, related_name="items", verbose_name="Pedido"
     )
     product = models.ForeignKey(
         "products.Product",
         on_delete=models.PROTECT,
         related_name="order_items",
-        verbose_name="Produto"
+        verbose_name="Produto",
     )
-    quantity = models.PositiveIntegerField(
-        verbose_name="Quantidade"
-    )
-    unit_price = models.DecimalField(
-        max_digits=15,
-        decimal_places=2,
-        verbose_name="Preço initário"
-    )
-    subtotal = models.DecimalField(
-        max_digits=15,
-        decimal_places=2,
-        verbose_name="Subtotal"
-    )
+    quantity = models.PositiveIntegerField(verbose_name="Quantidade")
+    unit_price = models.DecimalField(max_digits=15, decimal_places=2, verbose_name="Preço initário")
+    subtotal = models.DecimalField(max_digits=15, decimal_places=2, verbose_name="Subtotal")
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -114,23 +89,16 @@ class OrderItem(models.Model):
 class OrderStatusHistory(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     order = models.ForeignKey(
-        Order,
-        on_delete=models.CASCADE,
-        related_name="status_history",
-        verbose_name="Pedido"
+        Order, on_delete=models.CASCADE, related_name="status_history", verbose_name="Pedido"
     )
     previous_status = models.CharField(
-        max_length=20,
-        choices=OrderStatus.choices,
-        verbose_name="Status anterir"
+        max_length=20, choices=OrderStatus.choices, verbose_name="Status anterir"
     )
     new_status = models.CharField(
-        max_length=20,
-        choices=OrderStatus.choices,
-        verbose_name="Novo status"
+        max_length=20, choices=OrderStatus.choices, verbose_name="Novo status"
     )
     changed_by = models.CharField(
-       max_length=255,
+        max_length=255,
     )
     reason = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

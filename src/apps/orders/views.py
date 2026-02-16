@@ -1,12 +1,14 @@
-from django.shortcuts import get_object_or_404
 from django.db import transaction
 from django.db.models import F
-from rest_framework import status, viewsets, mixins
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.exceptions import ValidationError
-from drf_spectacular.utils import extend_schema, extend_schema_view
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema, extend_schema_view
+from rest_framework import mixins, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
+
+from apps.orders.filters import OrderFilter
 from apps.orders.models import Order, OrderItem, OrderStatus, OrderStatusHistory
 from apps.orders.serializers import (
     OrderCreateSerializer,
@@ -15,15 +17,11 @@ from apps.orders.serializers import (
     OrderStatusHistoryOutputSerializer,
     OrderStatusUpdateSerializer,
 )
-from apps.orders.filters import OrderFilter
 from apps.products.models import Product
 
 
 @extend_schema_view(
-    list=extend_schema(
-        summary="Listagem de Pedidos",
-        tags=["Pedidos"]
-    ),
+    list=extend_schema(summary="Listagem de Pedidos", tags=["Pedidos"]),
     retrieve=extend_schema(summary="Detalhar pedido", tags=["Pedidos"]),
     create=extend_schema(
         request=OrderCreateSerializer,
@@ -38,7 +36,7 @@ class OrderViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
     mixins.DestroyModelMixin,
-    mixins.RetrieveModelMixin
+    mixins.RetrieveModelMixin,
 ):
     queryset = Order.objects.all()
     filter_backends = [DjangoFilterBackend]
@@ -63,9 +61,7 @@ class OrderViewSet(
         order = serializer.save()
 
         status_code = status.HTTP_201_CREATED
-        if Order.objects.filter(
-            idempotency_key=request.data.get("idempotency_key")
-        ).count() > 1:
+        if Order.objects.filter(idempotency_key=request.data.get("idempotency_key")).count() > 1:
             status_code = status.HTTP_200_OK
 
         output = OrderDetailSerializer(order)
@@ -88,10 +84,7 @@ class OrderViewSet(
         serializer.is_valid(raise_exception=True)
         order = serializer.save()
 
-        return Response(
-            OrderDetailSerializer(order).data,
-            status=status.HTTP_200_OK
-        )
+        return Response(OrderDetailSerializer(order).data, status=status.HTTP_200_OK)
 
     @extend_schema(
         responses=OrderItemOutputSerializer(many=True),
@@ -102,10 +95,7 @@ class OrderViewSet(
     def items(self, request, id=None):
         order = self.get_object()
         items = (
-            OrderItem.objects
-            .select_related("product")
-            .filter(order=order)
-            .order_by("created_at")
+            OrderItem.objects.select_related("product").filter(order=order).order_by("created_at")
         )
         serializer = OrderItemOutputSerializer(items, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -118,11 +108,7 @@ class OrderViewSet(
     @action(detail=True, methods=["get"], url_path="status-history")
     def status_history(self, request, id=None):
         order = self.get_object()
-        history = (
-            OrderStatusHistory.objects
-            .filter(order=order)
-            .order_by("created_at")
-        )
+        history = OrderStatusHistory.objects.filter(order=order).order_by("created_at")
         serializer = OrderStatusHistoryOutputSerializer(history, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -130,16 +116,11 @@ class OrderViewSet(
         order = self.get_object()
 
         if order.status not in [OrderStatus.PENDING, OrderStatus.CONFIRMED]:
-            raise ValidationError(
-                "Apenas pedidos PENDENTE ou CONFIRMADO podem ser cancelados."
-            )
+            raise ValidationError("Apenas pedidos PENDENTE ou CONFIRMADO podem ser cancelados.")
 
         with transaction.atomic():
             items = (
-                OrderItem.objects
-                .select_related("product")
-                .select_for_update()
-                .filter(order=order)
+                OrderItem.objects.select_related("product").select_for_update().filter(order=order)
             )
 
             for item in items:

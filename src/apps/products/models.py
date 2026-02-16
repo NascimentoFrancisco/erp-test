@@ -1,35 +1,15 @@
 from django.db import models
+
 from apps.core.models import CoreModel
 
 
 class Product(CoreModel):
-    sku = models.CharField(
-        max_length=50,
-        unique=True,
-        db_index=True,
-        verbose_name="Código interno"
-    )
-    name = models.CharField(
-        max_length=255,
-        verbose_name="Nome"
-    )
-    description = models.TextField(
-        blank=True,
-        verbose_name="Descrição"
-    )
-    price = models.DecimalField(
-        max_digits=15,
-        decimal_places=2,
-        verbose_name="Preço"
-    )
-    stock_quantity = models.PositiveIntegerField(
-        verbose_name="Quantidade em estoque"
-    )
-    is_active = models.BooleanField(
-        default=True,
-        db_index=True,
-        verbose_name="Status"
-    )
+    sku = models.CharField(max_length=50, unique=True, db_index=True, verbose_name="Código interno")
+    name = models.CharField(max_length=255, verbose_name="Nome")
+    description = models.TextField(blank=True, verbose_name="Descrição")
+    price = models.DecimalField(max_digits=15, decimal_places=2, verbose_name="Preço")
+    stock_quantity = models.PositiveIntegerField(verbose_name="Quantidade em estoque")
+    is_active = models.BooleanField(default=True, db_index=True, verbose_name="Status")
 
     class Meta:
         verbose_name = "Produto"

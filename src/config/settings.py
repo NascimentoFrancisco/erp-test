@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
-from decouple import config
 
+from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -21,15 +21,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "drf_spectacular"
+    "drf_spectacular",
 ]
 
-INSTALLED_APPS = INSTALLED_APPS + [
-    "apps.core",
-    "apps.customers",
-    "apps.products",
-    "apps.orders"
-]
+INSTALLED_APPS = INSTALLED_APPS + ["apps.core", "apps.customers", "apps.products", "apps.orders"]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

@@ -1,16 +1,12 @@
 import uuid
+
 from django.db import transaction
 from django.db.models import F
 from rest_framework import serializers
-from apps.customers.models import Customer
-from apps.products.models import Product
-from apps.orders.models import (
-    Order,
-    OrderItem,
-    OrderStatus,
-    OrderStatusHistory
-)
 
+from apps.customers.models import Customer
+from apps.orders.models import Order, OrderItem, OrderStatus, OrderStatusHistory
+from apps.products.models import Product
 
 VALID_TRANSITIONS = {
     OrderStatus.PENDING: [OrderStatus.CONFIRMED, OrderStatus.CANCELED],
@@ -52,9 +48,7 @@ class OrderCreateSerializer(serializers.Serializer):
         idempotency_key = validated_data["idempotency_key"]
         observations = validated_data.get("observations", "")
 
-        existing = Order.objects.filter(
-            idempotency_key=idempotency_key
-        ).first()
+        existing = Order.objects.filter(idempotency_key=idempotency_key).first()
 
         if existing:
             return existing
@@ -64,10 +58,8 @@ class OrderCreateSerializer(serializers.Serializer):
             products_map = {}
 
             for item in items:
-                product = (
-                    Product.objects
-                    .select_for_update()
-                    .get(id=item["product_id"], is_active=True)
+                product = Product.objects.select_for_update().get(
+                    id=item["product_id"], is_active=True
                 )
 
                 if product.stock_quantity < item["quantity"]:
@@ -142,7 +134,7 @@ class OrderDetailSerializer(serializers.ModelSerializer):
             "status",
             "total_amount",
             "observations",
-            "created_at"
+            "created_at",
         ]
 
 

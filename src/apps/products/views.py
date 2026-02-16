@@ -1,32 +1,26 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import (
-    viewsets,
-    status,
-    response
-)
-from rest_framework.decorators import action
-from drf_spectacular.utils import extend_schema, extend_schema_view
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema, extend_schema_view
+from rest_framework import response, status, viewsets
+from rest_framework.decorators import action
+
+from apps.products.filters import ProductFilter
 from apps.products.models import Product
 from apps.products.serializers import (
     ProductModelSerializer,
+    ProductStockUpdateSerializer,
     ProductUpdateSerializer,
-    ProductStockUpdateSerializer
 )
-from apps.products.filters import ProductFilter
 
 
 @extend_schema_view(
-    list=extend_schema(
-        summary="Listagem de produtos",
-        tags=["Produtos"]
-    ),
+    list=extend_schema(summary="Listagem de produtos", tags=["Produtos"]),
     retrieve=extend_schema(summary="Detalhar produto", tags=["Produtos"]),
     partial_update=extend_schema(
         summary="Atualização parcial",
         request=ProductUpdateSerializer,
         responses=ProductModelSerializer,
-        tags=["Produtos"]
+        tags=["Produtos"],
     ),
     create=extend_schema(
         request=ProductModelSerializer,
@@ -61,7 +55,4 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         product.update_stock(serializer.validated_data["stock_quantity"])
 
-        return response.Response(
-            ProductModelSerializer(product).data,
-            status=status.HTTP_200_OK
-        )
+        return response.Response(ProductModelSerializer(product).data, status=status.HTTP_200_OK)

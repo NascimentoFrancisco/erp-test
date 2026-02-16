@@ -13,9 +13,7 @@ class PersonalPagination(PageNumberPagination):
     max_page_size = MAX_PAGE_SIZE
 
     def get_page_size(self, request):
-        page_size = request.query_params.get(
-            self.page_size_query_param, DEFAULT_PAGE_SIZE
-        )
+        page_size = request.query_params.get(self.page_size_query_param, DEFAULT_PAGE_SIZE)
         return min(int(page_size), self.max_page_size)
 
     def get_paginated_response(self, data):
