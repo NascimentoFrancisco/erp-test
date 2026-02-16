@@ -5,7 +5,7 @@ from pycpfcnpj import cpfcnpj
 def validate_document(value):
     if not value:
         raise ValidationError(
-            f"Dado obrigatório."
+            "Dado obrigatório."
         )
 
     if not cpfcnpj.validate(value):

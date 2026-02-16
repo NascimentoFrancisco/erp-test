@@ -1,6 +1,7 @@
 import uuid
 import random
 import pytest
+from django.core.cache import cache
 from rest_framework import status
 from rest_framework.test import APIClient
 from apps.customers.models import Customer
@@ -172,6 +173,9 @@ def generate_valid_cpf():
 @pytest.mark.django_db
 def test_bulk_create_100_customers(api_client):
     for i in range(100):
+
+        cache.clear()
+
         data = {
             "name": f"Cliente {i}",
             "document": generate_valid_cpf(),

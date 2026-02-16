@@ -1,6 +1,7 @@
 import uuid
 import threading
 import pytest
+from django.core.cache import cache
 from rest_framework.test import APIClient
 from apps.customers.models import Customer
 from apps.products.models import Product
@@ -99,7 +100,9 @@ def test_order_idempotency(api_client, customer, product):
     }
 
     r1 = api_client.post("/api/v1/orders/", payload, format="json")
+    cache.clear()
     r2 = api_client.post("/api/v1/orders/", payload, format="json")
+    cache.clear()
     r3 = api_client.post("/api/v1/orders/", payload, format="json")
 
     assert Order.objects.count() == 1

@@ -1,12 +1,10 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import (
     viewsets,
-    mixins,
     status,
     response
 )
 from drf_spectacular.utils import extend_schema, extend_schema_view
-from apps.customers.serializers import CustomerModelSerializer
 from apps.customers.models import Customer
 from apps.customers.serializers import CustomerModelSerializer
 
@@ -39,11 +37,10 @@ class CustomerViewSet(viewsets.ModelViewSet):
         self.check_object_permissions(self.request, obj)
         return obj
 
-
     def destroy(self, request, *args, **kwargs):
         customer = self.get_object()
         customer.soft_delete()
-        
+
         return response.Response(
             {},
             status=status.HTTP_204_NO_CONTENT

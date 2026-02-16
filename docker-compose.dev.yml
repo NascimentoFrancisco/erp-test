@@ -8,6 +8,11 @@ services:
       - redis_data_erp:/data
     ports:
       - "127.0.0.1:6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
       - erp_network
 
@@ -16,14 +21,19 @@ services:
     container_name: erp_db
     restart: always
     environment:
-      MYSQL_DATABASE: erp
-      MYSQL_USER: erp
-      MYSQL_PASSWORD: erp
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ${DATABASE_NAME}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+    env_file:
+      - ./.env.dev
     ports:
       - "3306:3306"
     volumes:
       - mysqldata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p${DATABASE_PASSWORD} || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
       - erp_network
 
@@ -42,9 +52,9 @@ services:
       - ./.env.dev
     depends_on:
       db:
-        condition: service_started
+        condition: service_healthy
       redis-erp-dev:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000/health/ || exit 1"]
       interval: 10s
