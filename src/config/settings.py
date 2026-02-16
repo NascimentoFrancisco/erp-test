@@ -27,7 +27,8 @@ INSTALLED_APPS = [
 INSTALLED_APPS = INSTALLED_APPS + [
     "apps.core",
     "apps.customers",
-    "apps.products"
+    "apps.products",
+    "apps.orders"
 ]
 
 MIDDLEWARE = [
