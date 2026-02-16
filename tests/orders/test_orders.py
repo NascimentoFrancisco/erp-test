@@ -4,7 +4,7 @@ import pytest
 from rest_framework.test import APIClient
 from apps.customers.models import Customer
 from apps.products.models import Product
-from apps.orders.models import Order, OrderItem, OrderStatus
+from apps.orders.models import Order, OrderItem, OrderStatus, OrderStatusHistory
 
 
 @pytest.fixture
@@ -263,5 +263,46 @@ def test_list_order_items(api_client, customer, product):
 @pytest.mark.django_db
 def test_list_order_items_returns_404_when_order_does_not_exist(api_client):
     response = api_client.get(f"/api/v1/orders/{uuid.uuid4()}/items/")
+
+    assert response.status_code == 404
+
+
+@pytest.mark.django_db
+def test_list_order_status_history(api_client, customer):
+    order = Order.objects.create(
+        customer=customer,
+        total_amount=100,
+        idempotency_key="history-key"
+    )
+
+    first_history = OrderStatusHistory.objects.create(
+        order=order,
+        previous_status=OrderStatus.PENDING,
+        new_status=OrderStatus.CONFIRMED,
+        changed_by="System",
+        reason="Pedido validado",
+    )
+
+    second_history = OrderStatusHistory.objects.create(
+        order=order,
+        previous_status=OrderStatus.CONFIRMED,
+        new_status=OrderStatus.SEPARATED,
+        changed_by="Warehouse",
+        reason="Separação concluída",
+    )
+
+    response = api_client.get(f"/api/v1/orders/{order.id}/status-history/")
+
+    assert response.status_code == 200
+    assert len(response.data) == 2
+    assert response.data[0]["id"] == str(first_history.id)
+    assert response.data[0]["new_status"] == OrderStatus.CONFIRMED
+    assert response.data[1]["id"] == str(second_history.id)
+    assert response.data[1]["new_status"] == OrderStatus.SEPARATED
+
+
+@pytest.mark.django_db
+def test_list_order_status_history_returns_404_when_order_does_not_exist(api_client):
+    response = api_client.get(f"/api/v1/orders/{uuid.uuid4()}/status-history/")
 
     assert response.status_code == 404

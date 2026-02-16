@@ -146,8 +146,22 @@ class OrderDetailSerializer(serializers.ModelSerializer):
         ]
 
 
+class OrderStatusHistoryOutputSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderStatusHistory
+        fields = [
+            "id",
+            "previous_status",
+            "new_status",
+            "changed_by",
+            "reason",
+            "created_at",
+        ]
+
+
 class OrderStatusUpdateSerializer(serializers.Serializer):
     new_status = serializers.ChoiceField(choices=OrderStatus.choices)
+    changed_by = serializers.CharField(required=False, default="System")
     reason = serializers.CharField(required=False, allow_blank=True)
 
     def validate(self, attrs):
@@ -168,17 +182,17 @@ class OrderStatusUpdateSerializer(serializers.Serializer):
         new_status = self.validated_data["new_status"]
         previous_status = self.validated_data["previous_status"]
         reason = self.validated_data.get("reason", "")
+        changed_by = self.validated_data["changed_by"]
 
         with transaction.atomic():
             order.status = new_status
             order.save(update_fields=["status"])
 
             OrderStatusHistory.objects.create(
-                id=uuid.uuid4(),
                 order=order,
                 previous_status=previous_status,
                 new_status=new_status,
-                #changed_by="system",
+                changed_by=changed_by,
                 reason=reason,
             )
 

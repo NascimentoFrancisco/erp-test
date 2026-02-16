@@ -129,9 +129,9 @@ class OrderStatusHistory(models.Model):
         choices=OrderStatus.choices,
         verbose_name="Novo status"
     )
-    #changed_by = models.CharField(
-    #    max_length=255,   
-    #)
+    changed_by = models.CharField(
+       max_length=255,   
+    )
     reason = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -5,11 +5,12 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema, extend_schema_view
-from apps.orders.models import Order, OrderItem, OrderStatus
+from apps.orders.models import Order, OrderItem, OrderStatus, OrderStatusHistory
 from apps.orders.serializers import (
     OrderCreateSerializer,
     OrderDetailSerializer,
     OrderItemOutputSerializer,
+    OrderStatusHistoryOutputSerializer,
     OrderStatusUpdateSerializer,
 )
 from apps.products.models import Product
@@ -98,6 +99,22 @@ class OrderViewSet(
             .order_by("created_at")
         )
         serializer = OrderItemOutputSerializer(items, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        responses=OrderStatusHistoryOutputSerializer(many=True),
+        summary="Listar histórico de status do pedido",
+        tags=["Pedidos"],
+    )
+    @action(detail=True, methods=["get"], url_path="status-history")
+    def status_history(self, request, id=None):
+        order = self.get_object()
+        history = (
+            OrderStatusHistory.objects
+            .filter(order=order)
+            .order_by("created_at")
+        )
+        serializer = OrderStatusHistoryOutputSerializer(history, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def destroy(self, request, *args, **kwargs):
