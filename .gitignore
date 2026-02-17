@@ -17,7 +17,6 @@ poetry.toml
 db.sqlite3
 media/
 staticfiles/
-dev.sh
 
 .env
 .env.*
